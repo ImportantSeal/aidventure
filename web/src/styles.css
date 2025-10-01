@@ -1,0 +1,132 @@
+:root {
+  /* light theme (default) */
+  --bg: #f5f7fa;
+  --text: #0f172a;            /* slate-900 */
+  --card: #ffffff;
+  --border: #d1d5db;          /* gray-300 */
+  --border-strong: #9ca3af;   /* gray-400 */
+  --muted: #475569;           /* slate-600 */
+
+  --button-bg: #ffffff;
+  --button-text: #0f172a;
+  --button-border: #d1d5db;
+  --button-bg-hover: #f3f4f6;
+
+  --chip-bg: #ffffff;
+  --chip-text: #0f172a;
+  --chip-border: #d1d5db;
+  --chip-bg-hover: #f3f4f6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* DARK THEME */
+    --bg: #0b0e14;
+    --text: #e5e7eb;          /* gray-200 */
+    --card: #141821;
+    --border: #2b2f3a;
+    --border-strong: #3a4150;
+    --muted: #a1a1aa;         /* zinc-400 */
+
+    --button-bg: #1b2230;
+    --button-text: #e5e7eb;
+    --button-border: #2e3442;
+    --button-bg-hover: #222a3a;
+
+    --chip-bg: #1b2230;
+    --chip-text: #e5e7eb;
+    --chip-border: #2e3442;
+    --chip-bg-hover: #222a3a;
+  }
+}
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.row { display: flex; gap: 8px; margin-top: 12px; }
+
+/* inputs + buttons */
+.input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+}
+
+/* generic button (snd) */
+.button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--button-border);
+  background: var(--button-bg);
+  color: var(--button-text);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.button:hover { background: var(--button-bg-hover); }
+.button:disabled { opacity: .6; cursor: not-allowed; }
+
+/* suggestion chips */
+.chipBtn {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--chip-border);
+  background: var(--chip-bg);
+  color: var(--chip-text);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.chipBtn:hover { background: var(--chip-bg-hover); }
+.chipBtn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* panels (history / current turn) */
+.panelTitle {
+  font-size: 18px;
+  margin: 16px 0 8px;
+  color: var(--text);              /* force strong text */
+}
+
+.panel {
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);              /* force strong text */
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.panelBody {
+  padding: 14px;
+  white-space: pre-wrap;
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+/* history list */
+.historyList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.historyItem {
+  padding: 10px 0;
+  border-bottom: 1px dashed var(--border);
+}
+.historyItem:last-child { border-bottom: none; }
+
+.hint { margin-top: 16px; color: var(--muted); }
