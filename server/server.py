@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from groq import Groq
 
-# --- in-memory sessions ---
+# --- In-memory sessions ---
 SESSIONS: Dict[str, Dict[str, Any]] = {}
 
 # --- groq ---
@@ -92,7 +92,10 @@ def turn(payload: TurnIn):
 
     # update minimal log/turn
     state["turn"] += 1
-    state["log"].append(data.get("narration", ""))
+    state["log"].append({
+    "player": payload.text,
+    "gm": data.get("narration", "")
+    })
 
     return {
         "narration": data.get("narration", ""),

@@ -16,6 +16,11 @@
   --chip-text: #0f172a;
   --chip-border: #d1d5db;
   --chip-bg-hover: #f3f4f6;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* take full viewport height */
 }
 
 @media (prefers-color-scheme: dark) {
@@ -50,8 +55,8 @@ body {
 }
 
 .container {
+  width: 100%;
   max-width: 820px;
-  margin: 0 auto;
   padding: 16px;
 }
 
