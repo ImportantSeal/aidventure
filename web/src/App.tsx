@@ -6,7 +6,7 @@ import { useGame } from "./hooks/useGame";
 import "./styles.css";
 
 export default function App() {
-  const { history, current, choices, loading, send } = useGame();
+  const { history, currentGM, choices, loading, send, currentPlayer } = useGame();
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
@@ -16,7 +16,8 @@ export default function App() {
       {/* history on top */}
       <ChatHistory items={history} />
 
-      <TurnPanel narration={current} />
+      {/* the last user input and the narration based on it */}
+      <TurnPanel narration={currentGM} playerInput={currentPlayer} />
 
       {/* user input */}
       <div className="row">
