@@ -6,9 +6,10 @@ type HistoryEntry = { player: string; gm: string };
 export function useGame() {
   const [sessionId] = useState(() => crypto.randomUUID());
   const [history, setHistory] = useState<HistoryEntry[]>([]);
-  const [current, setCurrent] = useState<string | null>(null);
+  const [currentGM, setCurrentGM] = useState<string | null>(null);
   const [choices, setChoices] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentPlayer, setCurrentPlayer] = useState<string | null>(null);
 
   // store the "last player command" so we can pair it with GM narration on the next turn
   const lastPlayerRef = useRef<string | null>(null);
@@ -20,7 +21,7 @@ export function useGame() {
     setLoading(true);
     try {
       // keep track of previous GM narration and player command
-      const prevCurrent = current;
+      const prevCurrent = currentGM;
       const prevPlayer = lastPlayerRef.current;
       const sentNow = trimmed;
 
@@ -32,11 +33,12 @@ export function useGame() {
       }
 
       // update current GM narration and choices
-      setCurrent(data.narration ?? "");
+      setCurrentGM(data.narration ?? "");
       setChoices(data.choices ?? []);
 
       // remember the player's command for the next turn
       lastPlayerRef.current = sentNow;
+      setCurrentPlayer(sentNow);
 
       return data;
     } finally {
@@ -46,9 +48,10 @@ export function useGame() {
 
   // start the game automatically on mount
   useEffect(() => {
+    setCurrentPlayer("Start the adventure.");
     send("Start the adventure.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { sessionId, history, current, choices, loading, send };
+  return { sessionId, history, currentGM, choices, loading, send, currentPlayer };
 }
