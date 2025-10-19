@@ -1,0 +1,83 @@
+{
+  "Bandage": {
+    "type": "consumable",
+    "effect": { "hp": 2 },
+    "description": "A clean strip of cloth used to wrap small wounds. Restores 2 HP when used."
+  },
+  "Healing Potion": {
+    "type": "consumable",
+    "effect": { "hp": 5 },
+    "description": "A small glass vial of glowing red liquid. Restores 5 HP when consumed."
+  },
+  "Gold Coin": {
+    "type": "currency",
+    "effect": {},
+    "description": "A shiny gold coin. Valuable in most towns."
+  },
+  "Beer Keg": {
+    "type": "quest",
+    "effect": {},
+    "description": "A heavy wooden keg filled with the tavern’s best ale. Return it to complete the tavern quest."
+  },
+  "Iron Sword": {
+    "type": "weapon",
+    "effect": {},
+    "description": "A sturdy iron sword. Reliable and sharp, useful in close combat."
+  },
+  "Wooden Sword": {
+    "type": "weapon",
+    "effect": {},
+    "description": "A basic wooden sword. Not very effective, but better than nothing."
+  },
+  "Dagger": {
+    "type": "weapon",
+    "effect": {},
+    "description": "A small blade favored by rogues and goblins alike. Good for quick attacks."
+  },
+  "Crude Spear": {
+    "type": "weapon",
+    "effect": {},
+    "description": "A small bended spear often used by goblins. Can be thrown or used as a melee weapon."
+  },
+  "Torch": {
+    "type": "utility",
+    "effect": {},
+    "description": "A simple torch that lights up dark areas. Burns for several turns before going out."
+  },
+  "Old Map": {
+    "type": "utility",
+    "effect": {},
+    "description": "An old crude map that seems to lead somewhere. It might be useful for navigation."
+  },
+  "Shield": {
+    "type": "armor",
+    "effect": {},
+    "description": "A wooden shield reinforced with iron bands. Reduces incoming damage in battle."
+  },
+  "Tower Shield": {
+    "type": "armor",
+    "effect": {},
+    "description": "Iron shield with checkered pattern. Greatly reduces incoming damage in battle."
+  },
+  "Greater Healing Potion": {
+    "type": "consumable",
+    "effect": { "hp": 10 },
+    "description": "A rare golden tonic that revitalizes the drinker. Restores 10 HP."
+  },
+  "Lockpick": {
+    "type": "utility",
+    "effect": {},
+    "description": "A simple metal pick used to open locked chests or doors."
+  },
+  "Goblin Ear": {
+    "type": "quest",
+    "effect": {},
+    "description": "A trophy from a fallen goblin warrior. Proof of victory and a grim collectible."
+  },
+  "Healing Herbs": {
+    "type": "consumable",
+    "effect": { "hp": 3 },
+    "description": "A soothing ointment made from forest herbs. Restores 3 HP when applied."
+  }
+}
+
