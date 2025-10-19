@@ -59,8 +59,7 @@ export default function App() {
             <ChoiceButtons choices={choices} onChoose={(c) => send(c)} disabled={loading} />
 
             <p className="hint">
-              Tip: try commands like <i>“inspect the camp”</i>, <i>“sneak closer”</i>, or{" "}
-              <i>“grab the keg and run”</i>.
+              Tip: try commands like <i>“inspect the camp”</i>, <i>“sneak closer”</i>, or <i>“grab the keg and run”</i>.
             </p>
           </div>
         </div>
