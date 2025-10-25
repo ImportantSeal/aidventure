@@ -11,7 +11,7 @@ class Intent(BaseModel):
     action: ActionType
     target: Optional[str] = None
     item: Optional[str] = None
-    quantity: int = 1
+    quantity: Optional[int] = None
     direction: Optional[str] = None
     free_text: Optional[str] = None
 

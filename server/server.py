@@ -44,7 +44,7 @@ ALIASES = {
     "coin": "Gold Coin",
 
     "supplies": "supplies",   # käsitellään erikseen
-    "blacsmith": "blacksmith",
+    "blacksmith": "blacksmith",
     "black smith": "blacksmith",
 
     "bread": "Loaf of Bread",
