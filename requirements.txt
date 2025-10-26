@@ -1,0 +1,15 @@
+# Core runtime requirements for the backend
+fastapi>=0.95.0
+uvicorn[standard]>=0.22.0
+pydantic>=2.0
+python-dotenv>=1.0.0
+
+# Optional providers (install only if you plan to use them)
+# Groq client (used by default in `config.py` if GROQ keys are present)
+groq>=1.0.0
+# Google Gemini client (only if you intend to use the Gemini provider)
+google-generativeai>=0.3.0
+
+# Developer / testing helpers (optional)
+# pytest can be used to run unit tests if you add them
+pytest>=7.0.0
