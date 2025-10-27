@@ -64,5 +64,3 @@ Either approach works; the backend allows CORS for development.
 Optional: Build and serve the frontend from a static server
 - If you'd like to serve frontend and backend from the same origin, build the web app and serve the built files from any static host. The backend doesn't serve static assets by default — you can use a static file server or add a small static route to the backend if desired.
 
-Questions / next steps
-- I can add a `vite` proxy example, a small script to serve the frontend from the backend, or a `requirements-dev.txt` with pinned versions. Tell me which you'd prefer and I'll add it.
