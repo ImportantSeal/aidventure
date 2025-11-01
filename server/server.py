@@ -3,12 +3,17 @@
 import os
 import json, random, re
 from typing import Dict, Any
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.types import TurnIn, TurnOut, Intent
-from core.state import new_state, apply_health_change, apply_item_effect, get_item
+from core.state import (
+    new_state, apply_health_change, apply_item_effect,
+    get_item, build_llm_state, add_game_turn, get_memory_context,
+    update_long_summary
+)
 from core.sanity import sanity_check
+from core.memory import reset_memory
 from llm.intent import parse_intent
 from llm.narration import make_narration
 
@@ -33,6 +38,8 @@ def health_check():
 def ensure_session(session_id: str):
     if session_id not in SESSIONS:
         SESSIONS[session_id] = new_state()
+        # clear memory for a fresh adventure
+        reset_memory(session_id)
     return SESSIONS[session_id]
 
 # --------- NIMIEN NORMALISOINTI / ALIAKSET ----------
@@ -211,9 +218,25 @@ def try_shop_purchase(state: Dict[str, Any], intent: Intent) -> str | None:
     return f"You buy {items_list} for {total} Gold Coin(s)."
 
 # ------------------------------------------------------
+# Include memory in LLM state and record the turn
+def handle_turn(state, intent, dice, session_id: str, background_tasks: BackgroundTasks | None = None):
+    state_for_llm = build_llm_state(state, session_id)
+    intent_dict = intent.model_dump() if hasattr(intent, "model_dump") else intent
+    gm_result = make_narration(state_for_llm, intent_dict, dice)
+
+    # Record only the narration text; keep memory minimal
+    add_game_turn(gm_result.narration, session_id)
+
+    # Update long summary in background
+    if background_tasks is not None:
+        background_tasks.add_task(update_long_summary, session_id)
+    else:
+        update_long_summary(session_id)
+
+    return gm_result
 
 @app.post("/api/turn", response_model=TurnOut)
-def turn(payload: TurnIn):
+def turn(payload: TurnIn, background_tasks: BackgroundTasks):
     state = ensure_session(payload.session_id)
     dice = {"d20": random.randint(1, 20)}
 
@@ -226,7 +249,6 @@ def turn(payload: TurnIn):
         narration = f"{reason} Try something else."
         choices = ["LOOK around", "Go to cave", "Check inventory"]
         state["turn"] += 1
-        state["log"].append({"player": payload.text, "gm": narration})
         return TurnOut(narration=narration, choices=choices, end_game=False, state=state)
 
     # 3) Paikallinen logiikka: liikkuminen & kauppa ennen narraatiota
@@ -237,7 +259,6 @@ def turn(payload: TurnIn):
         # jos shop_text on pelkkä informatiivinen vastaus, anna muutama järkevä valinta
         narration = (move_text + " " if move_text else "") + shop_text
         state["turn"] += 1
-        state["log"].append({"player": payload.text, "gm": narration})
         choices = ["Buy Dagger", "Buy Iron Sword", "Buy Shield"] if state["world"]["location"] == "Blacksmith" else ["Buy Torch", "Buy Rope", "Buy Loaf of Bread"]
         # suodata valinnat, jotka oikeasti ovat olemassa items.jsonissa
         def exists(name: str) -> bool:
@@ -254,7 +275,7 @@ def turn(payload: TurnIn):
         )
 
     # 4) Narraatio (LLM #2)
-    gm = make_narration(state, intent.model_dump(), dice)
+    gm = handle_turn(state, intent, dice, payload.session_id, background_tasks)
 
     # 5) Sovelletaan muutokset turvallisesti
     apply_health_change(state, int(gm.health_change))
@@ -299,9 +320,8 @@ def turn(payload: TurnIn):
                 current_inv[lname] = {"name": key, "count": count}
             narration += f" You obtained {key}."
 
-    # 6) Päivitä loki & turn
+    # 6) Päivitä turn
     state["turn"] += 1
-    state["log"].append({"player": payload.text, "gm": narration})
 
     return TurnOut(
         narration=narration.strip(),
@@ -309,3 +329,13 @@ def turn(payload: TurnIn):
         end_game=gm.end_game,
         state=state,
     )
+
+# List active session ids
+@app.get("/api/sessions")
+def list_sessions():
+    return {"sessions": list(SESSIONS.keys())}
+
+# Inspect memory for a session: GET /api/memory?session_id=XYZ
+@app.get("/api/memory")
+def get_memory(session_id: str):
+    return get_memory_context(session_id)

@@ -1,5 +1,7 @@
 import json, os
 from typing import Dict, Any, Tuple
+from core.memory import get_memory_manager
+from llm.narration import update_memory_summary
 
 # load items database once
 ITEMS_PATH = os.path.join(os.path.dirname(__file__), "..", "items.json")
@@ -21,7 +23,6 @@ def new_state() -> Dict[str, Any]:
             {"name": "Gold Coin", "count": 5},
             {"name": "Wooden Sword", "count": 1},
         ],
-        "log": [],
     }
 
 def get_item(name: str) -> Tuple[str, Any]:
@@ -54,3 +55,27 @@ def apply_item_effect(state: Dict[str, Any], item_name: str) -> str:
             else f"You use the {key}, but it has no effect."
         )
     return ""
+
+# MEMORY HELPER FUNCTIONS
+
+def add_game_turn(turn_text: str, session_id: str):
+    mm = get_memory_manager(session_id)
+    mm.add_turn_text(turn_text)
+
+def update_long_summary(session_id: str):
+    mm = get_memory_manager(session_id)
+    mm.update_long_summary(update_memory_summary)
+
+def get_memory_context(session_id: str):
+    mm = get_memory_manager(session_id)
+    return {
+        "short_term": mm.get_short_texts(),
+        "long_term": mm.get_long_summary(),
+    }
+
+def build_llm_state(state: Dict[str, Any], session_id: str) -> Dict[str, Any]:
+    s = dict(state)
+    mm = get_memory_manager(session_id)
+    s["memory_long_summary"] = mm.get_long_summary()
+    s["memory_short_turns"] = mm.get_short_texts()
+    return s
