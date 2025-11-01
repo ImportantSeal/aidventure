@@ -4,6 +4,7 @@ import { postTurn, type ApiResponse } from "../api/client";
 type HistoryEntry = { player: string; gm: string };
 
 export function useGame() {
+  const didInit = useRef(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [currentGM, setCurrentGM] = useState<string | null>(null);
@@ -57,6 +58,10 @@ export function useGame() {
 
   // start the game automatically on mount
   useEffect(() => {
+    // prevent double initialization in StrictMode
+    if (didInit.current) return;
+    didInit.current = true;
+
     setCurrentPlayer("Start the adventure.");
     send("Start the adventure.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
