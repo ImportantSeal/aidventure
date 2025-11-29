@@ -58,9 +58,9 @@ def apply_item_effect(state: Dict[str, Any], item_name: str) -> str:
 
 # MEMORY HELPER FUNCTIONS
 
-def add_game_turn(turn_text: str, session_id: str):
+def add_game_turn(player_text: str, gm_text: str, session_id: str):
     mm = get_memory_manager(session_id)
-    mm.add_turn_text(turn_text)
+    mm.add_turn_text(player_text, gm_text)
 
 def update_long_summary(session_id: str):
     mm = get_memory_manager(session_id)

@@ -14,18 +14,21 @@ class MemoryManager:
     def __init__(self, short_term_limit: int = 5, max_long_chars: int = 1200):
         self.short_term_limit = short_term_limit
         self.max_long_chars = max_long_chars
-        self._short_texts: List[str] = []     # last N narration texts
+        # store pairs in short-term: {"player": str, "gm": str}
+        self._short_texts: List[Dict[str, str]] = []
         self._pending_texts: List[str] = []   # new texts since last summary
         self._long_summary: str = ""          # running summary of all events
 
-    def add_turn_text(self, text: str) -> None:
-        text = (text or "").strip()
-        if not text:
+    def add_turn_text(self, player_text: str, gm_text: str) -> None:
+        player_text = (player_text or "").strip()
+        gm_text = (gm_text or "").strip()
+        if not player_text and not gm_text:
             return
-        self._short_texts.append(text)
+        self._short_texts.append({"player": player_text, "gm": gm_text})
         if len(self._short_texts) > self.short_term_limit:
             self._short_texts.pop(0)
-        self._pending_texts.append(text)
+        if gm_text:
+            self._pending_texts.append(gm_text)
 
     def update_long_summary(self, summarize_func) -> None:
         if not self._pending_texts and self._long_summary:
@@ -35,7 +38,7 @@ class MemoryManager:
             self._long_summary = _trim_summary(new_summary.strip(), self.max_long_chars)
             self._pending_texts.clear()
 
-    def get_short_texts(self) -> List[str]:
+    def get_short_texts(self) -> List[Dict[str, str]]:
         return list(self._short_texts)
 
     def get_long_summary(self) -> str:

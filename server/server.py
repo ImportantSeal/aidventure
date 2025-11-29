@@ -219,13 +219,13 @@ def try_shop_purchase(state: Dict[str, Any], intent: Intent) -> str | None:
 
 # ------------------------------------------------------
 # Include memory in LLM state and record the turn
-def handle_turn(state, intent, dice, session_id: str, background_tasks: BackgroundTasks | None = None):
+def handle_turn(state, intent, dice, session_id: str, background_tasks: BackgroundTasks | None = None, player_text: str = ""):
     state_for_llm = build_llm_state(state, session_id)
     intent_dict = intent.model_dump() if hasattr(intent, "model_dump") else intent
     gm_result = make_narration(state_for_llm, intent_dict, dice)
 
-    # Record only the narration text; keep memory minimal
-    add_game_turn(gm_result.narration, session_id)
+    # Record player + gm pair for short memory
+    add_game_turn(player_text or "", gm_result.narration, session_id)
 
     # Update long summary in background
     if background_tasks is not None:
@@ -275,7 +275,7 @@ def turn(payload: TurnIn, background_tasks: BackgroundTasks):
         )
 
     # 4) Narraatio (LLM #2)
-    gm = handle_turn(state, intent, dice, payload.session_id, background_tasks)
+    gm = handle_turn(state, intent, dice, payload.session_id, background_tasks, player_text=payload.text)
 
     # 5) Sovelletaan muutokset turvallisesti
     apply_health_change(state, int(gm.health_change))
