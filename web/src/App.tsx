@@ -1,4 +1,6 @@
-import { useRef } from "react";
+
+
+import { useRef, useEffect, useState } from "react";
 import ChatHistory from "./components/ChatHistory";
 import TurnPanel from "./components/TurnPanel";
 import InventoryPanel from "./components/InventoryPanel";
@@ -10,6 +12,19 @@ import "./styles.css";
 export default function App() {
   const { history, currentGM, choices, loading, send, currentPlayer, hp, maxHp, inventory, state } = useGame();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Animated thinking indicator
+  const [thinkingDots, setThinkingDots] = useState(0);
+  useEffect(() => {
+    if (!loading) {
+      setThinkingDots(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setThinkingDots((d) => (d + 1) % 3);
+    }, 500);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   return (
     <div className="container">
@@ -98,6 +113,11 @@ export default function App() {
 
             <ChoiceButtons choices={choices} onChoose={(c) => send(c)} disabled={loading} />
 
+            {loading && (
+              <div style={{ color: '#a1a1aa', fontSize: 15, margin: '10px 0 0 0', minHeight: 24 }}>
+                Thinking{'.'.repeat(thinkingDots + 1)}
+              </div>
+            )}
             <p className="hint">
               Tip: try commands like <i>"inspect the camp"</i>, <i>"sneak closer"</i>, or <i>"grab the keg and run"</i>.
             </p>
