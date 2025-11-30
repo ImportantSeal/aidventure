@@ -26,3 +26,4 @@ class LLMConfig:
     gemini_api_key: str = os.environ.get("GEMINI_API_KEY", "")
 
 CFG = LLMConfig()
+q

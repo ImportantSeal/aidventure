@@ -17,30 +17,43 @@ export default function App() {
       {/* Main layout: left sprite box, game content (center) and inventory/map (right) */}
         <div style={{ display: "flex", alignItems: "stretch", gap: 24 }}>
         {/* Left sprite box */}
-          <div style={{ flexBasis: 220, flexShrink: 0, display: "flex", flexDirection: "column" }}>
-            <div
-              className="panel"
-              style={{
-                width: "100%",
-                display: "flex",
-                flexDirection: "column",
-                padding: 10,
-                boxSizing: "border-box",
-                backgroundImage: "url('/assets/spritebackground.jpg')",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                borderRadius: 10,
-              }}
-            >
-              <div style={{ fontSize: 12, color: "black", marginBottom: 8, textAlign: "center" }}>GOD</div>
-              <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <img
-                  src="/assets/knightidle.gif"
-                  alt="Player sprite"
-                  style={{ width: "100%", height: "100%", maxWidth: 200, objectFit: "contain", borderRadius: 8 }}
-                />
-              </div>
-            </div>
+          <div style={{ flexBasis: 320, flexShrink: 0, display: "flex", flexDirection: "column" }}>
+            {(() => {
+              // Determine background image based on location
+              const loc = state?.world?.location || "default";
+              // Lowercase, no spaces, fallback to default
+              const locKey = String(loc).toLowerCase().replace(/\s+/g, "");
+              const bgUrl = `/assets/spritebg_${locKey}.jpg`;
+              // If you want to check if the file exists, you could add logic or just let the browser fallback
+              // If you want a default fallback, use a backgroundImage with multiple URLs
+              const backgroundImage = `url('${bgUrl}'), url('/assets/spritebackground.jpg')`;
+              return (
+                <div
+                  className="panel"
+                  style={{
+                    width: "100%",
+                    minHeight: 320,
+                    display: "flex",
+                    flexDirection: "column",
+                    padding: 18,
+                    boxSizing: "border-box",
+                    backgroundImage,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    borderRadius: 16,
+                  }}
+                >
+                  <div style={{ fontSize: 15, color: "black", marginBottom: 12, textAlign: "center", fontWeight: 700 }}>GOD</div>
+                  <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <img
+                      src="/assets/knightidle.gif"
+                      alt="Player sprite"
+                      style={{ width: "90%", height: "90%", maxWidth: 260, objectFit: "contain", borderRadius: 12, boxShadow: "0 2px 16px #0004" }}
+                    />
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
         {/* game content (narrower chat) */}
