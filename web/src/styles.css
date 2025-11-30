@@ -56,8 +56,16 @@ body {
 
 .container {
   width: 100%;
-  max-width: 65vw;
+  max-width: 60vw; /* slightly narrower chat area */
   padding: 16px;
+}
+
+.spriteBox .panel {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .row { display: flex; gap: 8px; margin-top: 12px; }
