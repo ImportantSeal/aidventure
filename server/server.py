@@ -417,6 +417,7 @@ def turn(payload: TurnIn, background_tasks: BackgroundTasks):
         narration = f"{reason} Try something else."
         choices = ["LOOK around", "Go to cave", "Check inventory"]
         state["turn"] += 1
+        state["log"].append({"player": payload.text, "gm": narration})
         return TurnOut(
             narration=narration,
             choices=choices,
@@ -434,6 +435,7 @@ def turn(payload: TurnIn, background_tasks: BackgroundTasks):
         narration = narration.strip()
 
         state["turn"] += 1
+        state["log"].append({"player": payload.text, "gm": narration})
 
         # Tarjoa fiksut nappivalinnat tunnetuissa paikoissa
         if state["world"]["location"] == "Blacksmith":
@@ -509,8 +511,9 @@ def turn(payload: TurnIn, background_tasks: BackgroundTasks):
                 current_inv[lname] = {"name": key, "count": count}
             narration += f" You obtained {key}."
 
-    # 6) turn counter
+    # 6) päivitä loki & turn
     state["turn"] += 1
+    state["log"].append({"player": payload.text, "gm": narration})
 
     # 7) pelin päättyminen
     if gm.end_game:

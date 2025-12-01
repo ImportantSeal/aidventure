@@ -25,6 +25,7 @@ def new_state() -> Dict[str, Any]:
             {"name": "Gold Coin", "count": 5},
             {"name": "Wooden Sword", "count": 1},
         ],
+        "log": [],
         "game_over": False, # (valinnainen, mutta järkevä)
     }
 
