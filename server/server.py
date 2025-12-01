@@ -4,7 +4,7 @@ import random
 import re
 from typing import Dict, Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 
 from core.types import TurnIn, TurnOut, Intent
@@ -14,8 +14,13 @@ from core.state import (
     apply_item_effect,
     get_item,
     ITEMS_DB,
+    build_llm_state,
+    add_game_turn,
+    get_memory_context,
+    update_long_summary,
 )
 from core.sanity import sanity_check
+from core.memory import reset_memory
 from llm.intent import parse_intent
 from llm.narration import make_narration
 
@@ -47,6 +52,8 @@ def ensure_session(session_id: str) -> Dict[str, Any]:
     """Luo uuden pelitilan jos sessiota ei ole, muuten palauttaa olemassa olevan."""
     if session_id not in SESSIONS:
         SESSIONS[session_id] = new_state()
+        # clear memory for a fresh adventure
+        reset_memory(session_id)
     return SESSIONS[session_id]
 
 
@@ -376,12 +383,28 @@ def try_shop_purchase(state: Dict[str, Any], intent: Intent, raw_text: str) -> s
     items_list = ", ".join(name for name, _ in wanted)
     return f"You buy {items_list} for {total} Gold Coin(s)."
 
+# Include memory in LLM state and record the turn
+def handle_turn(state, intent, dice, session_id: str, background_tasks: BackgroundTasks | None = None, player_text: str = ""):
+    state_for_llm = build_llm_state(state, session_id)
+    intent_dict = intent.model_dump() if hasattr(intent, "model_dump") else intent
+    gm_result = make_narration(state_for_llm, intent_dict, dice)
+
+    # Record player + gm pair for short memory
+    add_game_turn(player_text or "", gm_result.narration, session_id)
+
+    # Update long summary in background
+    if background_tasks is not None:
+        background_tasks.add_task(update_long_summary, session_id)
+    else:
+        update_long_summary(session_id)
+
+    return gm_result
 
 # ----------------- pää-endpoint / peliturni -----------------
 
 
 @app.post("/api/turn", response_model=TurnOut)
-def turn(payload: TurnIn):
+def turn(payload: TurnIn, background_tasks: BackgroundTasks):
     state = ensure_session(payload.session_id)
     dice = {"d20": random.randint(1, 20)}
 
@@ -438,7 +461,7 @@ def turn(payload: TurnIn):
         )
 
     # 4) varsinaisen GM-narration kutsu (LLM #2)
-    gm = make_narration(state, intent.model_dump(), dice)
+    gm = handle_turn(state, intent, dice, payload.session_id, background_tasks, player_text=payload.text)
 
     # 5) hp ja inventoryn muutokset turvallisesti
     apply_health_change(state, int(gm.health_change))
@@ -488,7 +511,7 @@ def turn(payload: TurnIn):
                 current_inv[lname] = {"name": key, "count": count}
             narration += f" You obtained {key}."
 
-    # 6) turn counter + logi
+    # 6) päivitä loki & turn
     state["turn"] += 1
     state["log"].append({"player": payload.text, "gm": narration})
 
@@ -502,3 +525,13 @@ def turn(payload: TurnIn):
         end_game=gm.end_game,
         state=state,
     )
+    
+# List active session ids
+@app.get("/api/sessions")
+def list_sessions():
+    return {"sessions": list(SESSIONS.keys())}
+
+# Inspect memory for a session: GET /api/memory?session_id=XYZ
+@app.get("/api/memory")
+def get_memory(session_id: str):
+    return get_memory_context(session_id)
