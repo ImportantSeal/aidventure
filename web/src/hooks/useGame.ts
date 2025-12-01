@@ -4,6 +4,7 @@ import { postTurn, type ApiResponse } from "../api/client";
 type HistoryEntry = { player: string; gm: string };
 
 export function useGame() {
+  const didInit = useRef(false);
   const [sessionId] = useState(() => crypto.randomUUID());
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [currentGM, setCurrentGM] = useState<string | null>(null);
@@ -14,6 +15,7 @@ export function useGame() {
   const [hp, setHp] = useState<number>(10);
   const [maxHp, setMaxHp] = useState<number>(10);
   const [inventory, setInventory] = useState<{name: string; count: number}[]>([]);
+  const [state, setState] = useState<any>(null);
 
   // store the "last player command" so we can pair it with GM narration on the next turn
   const lastPlayerRef = useRef<string | null>(null);
@@ -44,6 +46,7 @@ export function useGame() {
       setHp(data.state.player.hp);
       setMaxHp(data.state.player.max_hp);
       setInventory(data.state.inventory);
+  setState(data.state);
 
       // remember the player's command for the next turn
       lastPlayerRef.current = sentNow;
@@ -57,10 +60,14 @@ export function useGame() {
 
   // start the game automatically on mount
   useEffect(() => {
+    // prevent double initialization in StrictMode
+    if (didInit.current) return;
+    didInit.current = true;
+
     setCurrentPlayer("Start the adventure.");
     send("Start the adventure.");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return { sessionId, history, currentGM, choices, loading, send, currentPlayer, hp, maxHp, inventory };
+  return { sessionId, history, currentGM, choices, loading, send, currentPlayer, hp, maxHp, inventory, state };
 }

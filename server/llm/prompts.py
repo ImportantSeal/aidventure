@@ -72,3 +72,35 @@ def narration_user(state_json: str, intent_json: str, dice_json: str) -> str:
         "Server dice (for inspiration): " + dice_json + "\n\n"
         "Return one JSON object with the required keys and formats. No extra text."
     )
+
+
+MEMORY_UPDATE_SYSTEM = (
+    "You maintain a long-term memory summary for a small text adventure game.\n"
+    "You are given:\n"
+    "- The previous long-term summary (may be empty).\n"
+    "- A JSON array of new narration texts since the last update.\n\n"
+    "Your job:\n"
+    "- Produce an updated, concise summary that captures all important events so far.\n"
+    "- Keep it short and readable, as if you were writing a recap for the GM.\n"
+    "- You may rewrite and compress earlier parts; don't just append.\n\n"
+    "Output format:\n"
+    "- Return ONLY JSON with a single key: summary (string).\n"
+    "- No extra keys, no explanations, no markdown.\n"
+)
+
+
+def memory_update_user(prev_summary: str, new_texts_json: str) -> str:
+    """
+    Rakentaa user-promptin muistiyhteenvedon päivittämistä varten.
+
+    prev_summary: edellinen pitkä yhteenveto (string, voi olla tyhjä)
+    new_texts_json: JSON-array string, esim. '["Turn 1 ...", "Turn 2 ..."]'
+    """
+    prev = prev_summary or ""
+    return (
+        "Previous long-term summary (may be empty):\n"
+        + prev
+        + "\n\nNew narration texts (JSON array):\n"
+        + new_texts_json
+        + "\n\nReturn ONLY JSON with a single key 'summary'."
+    )

@@ -6,6 +6,7 @@ from core.types import GMResult
 from core.state import ITEMS_DB
 from llm.provider import get_provider
 from llm.prompts import NARRATION_SYSTEM, narration_user
+from llm.prompts import MEMORY_UPDATE_SYSTEM, memory_update_user
 from config import CFG
 
 _ACTION_MAP = {
@@ -66,3 +67,22 @@ def make_narration(state, intent, dice) -> GMResult:
     raw = prov.chat_json(CFG.narration_model, NARRATION_SYSTEM, user, temperature=0.5)
     clean = _normalize_inventory_change(raw)
     return GMResult.model_validate(clean)
+
+def update_memory_summary(prev_summary: str, new_texts: List[str]) -> str:
+    prev = (prev_summary or "").strip()
+    texts = [t.strip() for t in (new_texts or []) if t and t.strip()]
+    if not texts and prev:
+        return prev
+
+    prov = get_provider(CFG.narration_provider)
+    user = memory_update_user(prev, json.dumps(texts, ensure_ascii=False))
+    try:
+        resp = prov.chat_json(CFG.narration_model, MEMORY_UPDATE_SYSTEM, user, temperature=0.2)
+        summary = str(resp.get("summary", "")).strip()
+        if summary:
+            return summary
+    except Exception:
+        pass
+    # Fallback: simple concatenation with gentle trimming
+    combined = (prev + " " if prev else "") + " ".join(texts)
+    return combined.strip()[:1200]

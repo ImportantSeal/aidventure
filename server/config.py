@@ -18,7 +18,7 @@ class LLMConfig:
     narration_provider: str = os.environ.get("NARRATION_PROVIDER", "groq") # groq | gemini
     narration_model: str    = os.environ.get(
         "NARRATION_MODEL",
-        "llama-3.1-8b-instant" if os.environ.get("NARRATION_PROVIDER","groq").lower()=="groq" else "gemini-1.5-flash"
+        "llama-3.3-70b-versatile" if os.environ.get("NARRATION_PROVIDER","groq").lower()=="groq" else "gemini-1.5-flash"
     )
 
     # API-keyt (vain jos käytössä)
