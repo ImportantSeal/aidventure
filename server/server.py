@@ -376,6 +376,15 @@ def try_shop_purchase(state: Dict[str, Any], intent: Intent, raw_text: str) -> s
     items_list = ", ".join(name for name, _ in wanted)
     return f"You buy {items_list} for {total} Gold Coin(s)."
 
+# ------------------------------------------------------
+# Include memory in LLM state and record the turn
+def handle_turn(state, intent, dice, session_id: str, background_tasks: BackgroundTasks | None = None, player_text: str = ""):
+    state_for_llm = build_llm_state(state, session_id)
+    intent_dict = intent.model_dump() if hasattr(intent, "model_dump") else intent
+    gm_result = make_narration(state_for_llm, intent_dict, dice)
+
+    # Record player + gm pair for short memory
+    add_game_turn(player_text or "", gm_result.narration, session_id)
 
 # ----------------- pää-endpoint / peliturni -----------------
 
@@ -437,8 +446,8 @@ def turn(payload: TurnIn):
             state=state,
         )
 
-    # 4) varsinaisen GM-narration kutsu (LLM #2)
-    gm = make_narration(state, intent.model_dump(), dice)
+    # 4) Narraatio (LLM #2)
+    gm = handle_turn(state, intent, dice, payload.session_id, background_tasks, player_text=payload.text)
 
     # 5) hp ja inventoryn muutokset turvallisesti
     apply_health_change(state, int(gm.health_change))
