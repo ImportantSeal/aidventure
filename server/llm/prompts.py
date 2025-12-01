@@ -39,6 +39,8 @@ NARRATION_SYSTEM = (
     "- DO NOT move the player to new locations yourself. Movement is handled by the server logic. "
     "  You can describe intentions, but not actual travel.\n"
     "- Keep the world consistent; don't teleport or reset the player.\n\n"
+    "- Use state.memory_long_summary and state.memory_short_turns to maintain continuity; "
+    "  avoid repeating unchanged ambience or the same observation each turn.\n"
     "Quest / story rules:\n"
     "- Side activities (visiting blacksmith/market/tavern, chatting, small trades) are allowed.\n"
     "- Gently remind the player of the keg quest from time to time, but not in every single reply.\n"
@@ -73,34 +75,18 @@ def narration_user(state_json: str, intent_json: str, dice_json: str) -> str:
         "Return one JSON object with the required keys and formats. No extra text."
     )
 
-
-MEMORY_UPDATE_SYSTEM = (
-    "You maintain a long-term memory summary for a small text adventure game.\n"
-    "You are given:\n"
-    "- The previous long-term summary (may be empty).\n"
-    "- A JSON array of new narration texts since the last update.\n\n"
-    "Your job:\n"
-    "- Produce an updated, concise summary that captures all important events so far.\n"
-    "- Keep it short and readable, as if you were writing a recap for the GM.\n"
-    "- You may rewrite and compress earlier parts; don't just append.\n\n"
-    "Output format:\n"
-    "- Return ONLY JSON with a single key: summary (string).\n"
-    "- No extra keys, no explanations, no markdown.\n"
-)
-
+MEMORY_UPDATE_SYSTEM = """You maintain a concise long-term memory for a text adventure.
+Return strict JSON: {"summary": "<updated concise summary>"}.
+Use 3–6 sentences in past tense (~60–140 words).
+Preserve previously stated important facts; do not drop early setup (starting location, initial objective) or key events.
+Merge new facts with the previous summary. Include quest progress, key events, notable NPCs/locations, inventory/health changes.
+Avoid repeating ambience or filler."""
 
 def memory_update_user(prev_summary: str, new_texts_json: str) -> str:
-    """
-    Rakentaa user-promptin muistiyhteenvedon päivittämistä varten.
-
-    prev_summary: edellinen pitkä yhteenveto (string, voi olla tyhjä)
-    new_texts_json: JSON-array string, esim. '["Turn 1 ...", "Turn 2 ..."]'
-    """
-    prev = prev_summary or ""
     return (
-        "Previous long-term summary (may be empty):\n"
-        + prev
-        + "\n\nNew narration texts (JSON array):\n"
-        + new_texts_json
-        + "\n\nReturn ONLY JSON with a single key 'summary'."
+        "Previous summary (may be empty):\n"
+        + (prev_summary or "(none)") + "\n\n"
+        "New narration texts (JSON array of strings):\n"
+        + new_texts_json + "\n\n"
+        "Update the long-term summary. Return ONLY JSON."
     )
