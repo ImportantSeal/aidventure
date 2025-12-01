@@ -1,10 +1,11 @@
+# server/core/types.py
 from pydantic import BaseModel, Field
 from typing import List, Optional, Literal, Dict, Any
 
 ActionType = Literal[
     "LOOK", "MOVE", "TALK", "ATTACK", "USE_ITEM",
     "TAKE_ITEM", "DROP_ITEM", "GIVE_ITEM", "RUN", "WAIT",
-    "BUY"
+    "BUY", "OTHER"
 ]
 
 class Intent(BaseModel):
